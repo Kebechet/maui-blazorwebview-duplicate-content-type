@@ -1,0 +1,60 @@
+﻿@page "/"
+@inject IJSRuntime JS
+
+<h1>Content-Type check</h1>
+
+<p>Fetches static files served by BlazorWebView and prints the <code>content-type</code> header the page receives.</p>
+
+<button class="btn btn-primary" id="check" @onclick="CheckAsync">Fetch static files</button>
+
+@if (_report is not null)
+{
+    <p class="mt-3" id="user-agent"><small>@_report.UserAgent</small></p>
+
+    @foreach (var result in _report.Results)
+    {
+        <div class="result mb-3">
+            <div><strong>@result.Path</strong> (status @result.Status)</div>
+            <div>content-type header: <code>@result.ContentTypeHeader</code></div>
+            <div>blob.type: <code>@result.BlobType</code></div>
+            <div>data URL prefix: <code>@result.DataUrlPrefix</code></div>
+        </div>
+    }
+}
+
+@code {
+    static readonly string[] Paths =
+    [
+        "app.css",
+        "logo.svg",
+        "index.html",
+        "_framework/blazor.webview.js",
+    ];
+
+    ContentTypeReport? _report;
+
+    async Task CheckAsync()
+    {
+        _report = await JS.InvokeAsync<ContentTypeReport>("checkContentTypes", (object)Paths);
+
+        foreach (var result in _report.Results)
+        {
+            Console.WriteLine($"[content-type-check] {result.Path}: content-type header '{result.ContentTypeHeader}', blob.type '{result.BlobType}', data URL prefix '{result.DataUrlPrefix}'");
+        }
+    }
+
+    sealed class ContentTypeReport
+    {
+        public string UserAgent { get; set; } = "";
+        public List<ContentTypeResult> Results { get; set; } = [];
+    }
+
+    sealed class ContentTypeResult
+    {
+        public string Path { get; set; } = "";
+        public int Status { get; set; }
+        public string? ContentTypeHeader { get; set; }
+        public string? BlobType { get; set; }
+        public string? DataUrlPrefix { get; set; }
+    }
+}
