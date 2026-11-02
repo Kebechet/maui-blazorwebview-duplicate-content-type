@@ -2,7 +2,7 @@
 
 Minimal reproduction for a .NET MAUI `BlazorWebView` bug on Android: every static file the WebView serves from the app comes back with the `Content-Type` header twice, so the page sees `text/css, text/css` instead of `text/css`.
 
-- Issue: ISSUE_LINK
+- Issue: https://github.com/dotnet/maui/issues/39794
 
 The value is wrong everywhere the page can read it, not only in the header: `Blob.type` is the same comma-joined string, and so is the MIME type of a data URL built from the response with `FileReader.readAsDataURL`:
 
